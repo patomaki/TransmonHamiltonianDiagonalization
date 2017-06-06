@@ -1,0 +1,558 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 9.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       157,          7]
+NotebookDataLength[     20326,        549]
+NotebookOptionsPosition[     19451,        514]
+NotebookOutlinePosition[     19866,        532]
+CellTagsIndexPosition[     19823,        529]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell["\<\
+S. Patom\[ADoubleDot]ki 2016, 2017
+sofia.patomaki@helsinki.fi\
+\>", "Text",
+ CellChangeTimes->{{3.705596045212549*^9, 3.705596060713752*^9}, {
+  3.7056007971902027`*^9, 3.705600816751494*^9}}],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"If", "[", 
+   RowBox[{
+    RowBox[{"FreeQ", "[", 
+     RowBox[{"$Path", ",", "\"\</pathToQuantumMechanics.m/\>\""}], "]"}], ",",
+     "\[IndentingNewLine]", 
+    RowBox[{
+     RowBox[{"AppendTo", "[", 
+      RowBox[{"$Path", ",", "\"\</pathToQuantumMechanics.m/\>\""}], "]"}], 
+     ";"}]}], "\[IndentingNewLine]", "]"}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"Needs", "[", "\"\<QuantumMechanics`\>\"", "]"}], ";"}]}], "Input",
+ CellChangeTimes->{{3.7055960753905783`*^9, 3.705596097267377*^9}, {
+  3.705596244594721*^9, 3.7055963241312017`*^9}, {3.70576968785885*^9, 
+  3.7057696894165897`*^9}}],
+
+Cell["\<\
+We numerically diagonalize the CPB Hamiltonian as a function of the offset \
+charge and the phase.\
+\>", "Text",
+ CellChangeTimes->{{3.705599591638673*^9, 3.705599624393977*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{
+   RowBox[{"Clear", "[", 
+    RowBox[{
+    "NQuantaCPB", ",", "EC", ",", "EJmax", ",", "NM", ",", "CosPhiM", ",", 
+     "dng", ",", "dphi", ",", "ng1", ",", "ng2", ",", "phi1", ",", "phi2", 
+     ",", "ngList", ",", "phiList", ",", "Energyeg", ",", "tol"}], "]"}], 
+   ";"}], "\n", 
+  RowBox[{"(*", 
+   RowBox[{
+    RowBox[{"NquantaCPB", ":", " ", 
+     RowBox[{
+     "Maximum", " ", "number", " ", "of", " ", "excitations", " ", "in", " ", 
+      "Cooper", " ", "Pair", " ", "Box", " ", 
+      RowBox[{
+       RowBox[{"(", "CPB", ")"}], ".", "\n", "Formally"}]}]}], ",", " ", 
+    RowBox[{"it", " ", "should", " ", "be", " ", "infinity"}], ",", " ", 
+    RowBox[{
+    "but", " ", "a", " ", "small", " ", "number", " ", "will", " ", "do", " ",
+      "if", " ", "the", " ", "system", " ", "is", " ", "not", " ", "\n", 
+     "far", " ", "too", " ", 
+     RowBox[{"excited", ".", " ", "Note"}], " ", "that", " ", "there", " ", 
+     "are", " ", "both", " ", "negative", " ", "and", " ", "positive", " ", 
+     "eigenvalues"}], ",", "\n", 
+    RowBox[{
+    "as", " ", "explained", " ", "in", " ", "the", " ", "Appendix", " ", "B", 
+     " ", "of", " ", "the", " ", 
+     RowBox[{"thesis", "."}]}]}], "*)"}], " "}], "\n", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"NQuantaCPB", "=", "15"}], ";"}], " ", 
+  RowBox[{"(*", 
+   RowBox[{
+    RowBox[{
+    "Because", " ", "of", " ", "the", " ", "negative", " ", "eigenvalues"}], 
+    ",", " ", 
+    RowBox[{
+     RowBox[{"odd", " ", "number", " ", "is", " ", "more", " ", "natural"}], 
+     ";", " ", 
+     RowBox[{
+      RowBox[{
+      "no", " ", "relevant", " ", "change", " ", "for", " ", "NQuantaCPB"}], ">=",
+       "17"}]}]}], "*)"}], "\n", "\n", 
+  RowBox[{"(*", 
+   RowBox[{"Other", " ", "CPB", " ", "parameters", " ", 
+    RowBox[{"(", 
+     RowBox[{"specific", " ", "to", " ", "a", " ", "sample"}], ")"}], " ", 
+    "in", " ", "units", " ", "of", " ", 
+    RowBox[{"GHz", ":"}]}], "*)"}]}], "\n", 
+ RowBox[{
+  RowBox[{"EC", "=", "0.423"}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"EJmax", "=", "23.5"}], ";"}], "\n", "\n", 
+  RowBox[{"(*", 
+   RowBox[{"Number", " ", "operator"}], "*)"}]}], "\n", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"NM", "=", 
+    RowBox[{"Sum", "[", 
+     RowBox[{
+      RowBox[{
+       RowBox[{"(", 
+        RowBox[{"n", "-", 
+         RowBox[{"Floor", "[", 
+          RowBox[{"NQuantaCPB", "/", "2"}], "]"}]}], ")"}], "\[Times]", 
+       RowBox[{"KetBraM", "[", 
+        RowBox[{"NQuantaCPB", ",", "n", ",", "n"}], "]"}]}], ",", 
+      RowBox[{"{", 
+       RowBox[{"n", ",", "1", ",", "NQuantaCPB"}], "}"}]}], "]"}]}], ";"}], 
+  " ", "\n", 
+  RowBox[{"(*", 
+   RowBox[{"CosPhi", "-", 
+    RowBox[{
+    "operator", " ", "in", " ", "the", " ", "number", " ", "basis"}]}], 
+   "*)"}]}], "\n", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"CosPhiM", "=", 
+    RowBox[{
+     RowBox[{"Sum", "[", 
+      RowBox[{
+       RowBox[{"Sum", "[", 
+        RowBox[{
+         RowBox[{"If", "[", 
+          RowBox[{
+           RowBox[{
+            RowBox[{"Abs", "[", 
+             RowBox[{"i", "-", "j"}], "]"}], "\[Equal]", "1"}], ",", 
+           RowBox[{"KetBraM", "[", 
+            RowBox[{"NQuantaCPB", ",", "i", ",", "j"}], "]"}], ",", "0"}], 
+          "]"}], ",", 
+         RowBox[{"{", 
+          RowBox[{"i", ",", "1", ",", "NQuantaCPB"}], "}"}]}], "]"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"j", ",", "1", ",", "NQuantaCPB"}], "}"}]}], "]"}], "/", 
+     "2"}]}], ";"}], "\n", "\n", 
+  RowBox[{"(*", 
+   RowBox[{
+    RowBox[{
+    "Loop", " ", "over", " ", "offset", " ", "charge", " ", "in", " ", 
+     "steps", " ", "of", " ", "dng"}], ";", " ", 
+    RowBox[{"phi", " ", "in", " ", "steps", " ", "of", " ", "dphi"}]}], 
+   "*)"}]}], "\n", 
+ RowBox[{
+  RowBox[{"dng", "=", "0.5"}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{"ng1", "=", 
+   RowBox[{"-", "0.5"}]}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{"ng2", "=", "0.5"}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{"dphi", "=", "0.1"}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{"phi1", "=", 
+   RowBox[{"-", "\[Pi]"}]}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{"phi2", "=", "\[Pi]"}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{"ngList", "=", 
+   RowBox[{"Table", "[", 
+    RowBox[{"ng", ",", 
+     RowBox[{"{", 
+      RowBox[{"ng", ",", "ng1", ",", "ng2", ",", "dng"}], "}"}]}], "]"}]}], 
+  ";"}], "\n", 
+ RowBox[{
+  RowBox[{"phiList", "=", 
+   RowBox[{"Table", "[", 
+    RowBox[{"phi", ",", 
+     RowBox[{"{", 
+      RowBox[{"phi", ",", "phi1", ",", "phi2", ",", "dphi"}], "}"}]}], 
+    "]"}]}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"Energyeg", "=", 
+    RowBox[{"Table", "[", 
+     RowBox[{"0", ",", 
+      RowBox[{"{", 
+       RowBox[{"ng", ",", "ng1", ",", "ng2", ",", "dng"}], "}"}], ",", 
+      RowBox[{"{", 
+       RowBox[{"phi", ",", "phi1", ",", "phi2", ",", "dphi"}], "}"}]}], 
+     "]"}]}], ";"}], 
+  RowBox[{"(*", 
+   RowBox[{"Transition", " ", "energy"}], "*)"}]}], "\n", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"Do", "[", "\n", "\t", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"Do", "[", 
+       RowBox[{
+        RowBox[{
+         RowBox[{"Clear", "[", 
+          RowBox[{
+          "Ng", ",", "EJ", ",", "HamiltonianCPB", ",", "EigVals", ",", 
+           "EigVecs", ",", "gIndex", ",", "eIndex"}], "]"}], ";", "\n", 
+         "\t\t", 
+         RowBox[{"(*", 
+          RowBox[{"Offset", " ", "charge", " ", "matrix"}], "*)"}], "\n", 
+         "\t\t", 
+         RowBox[{"Ng", "=", 
+          RowBox[{
+           RowBox[{"ngList", "[", 
+            RowBox[{"[", "i", "]"}], "]"}], "\[Times]", 
+           RowBox[{"IdM", "[", "NQuantaCPB", "]"}]}]}], ";", "\n", "\t\t", 
+         "\n", "\t\t", 
+         RowBox[{"(*", 
+          RowBox[{
+          "Cooper", " ", "Pair", " ", "Box", " ", "Hamiltonian", " ", 
+           RowBox[{"(", 
+            RowBox[{
+            "definitions", " ", "found", " ", "in", " ", "Appendix", " ", 
+             "B"}], ")"}]}], "*)"}], "\n", "\t\t", 
+         RowBox[{"EJ", "=", 
+          RowBox[{"EJmax", "\[Times]", 
+           RowBox[{"Cos", "[", 
+            RowBox[{"phiList", "[", 
+             RowBox[{"[", "j", "]"}], "]"}], "]"}]}]}], ";", 
+         RowBox[{"(*", 
+          RowBox[{"Externally", "-", 
+           RowBox[{"tuned", " ", "Josephson", " ", "energy", " ", 
+            RowBox[{"(", 
+             RowBox[{"Eq", ".", " ", "2.35"}], ")"}]}]}], "*)"}], "\n", 
+         "\t\t", 
+         RowBox[{"HamiltonianCPB", "=", 
+          RowBox[{
+           RowBox[{"4", "\[Times]", "EC", "\[Times]", 
+            RowBox[{"MatrixPower", "[", 
+             RowBox[{
+              RowBox[{"NM", "-", 
+               RowBox[{"IdM", "[", "NQuantaCPB", "]"}]}], ",", "2"}], "]"}]}],
+            "-", 
+           RowBox[{"EJ", "\[Times]", "CosPhiM"}]}]}], ";", "\n", "\t", "\n", 
+         "\t\t", 
+         RowBox[{
+          RowBox[{"{", 
+           RowBox[{"EigVals", ",", "EigVecs"}], "}"}], "=", 
+          RowBox[{"Eigensystem", "[", 
+           RowBox[{"HamiltonianCPB", ",", 
+            RowBox[{"Cubics", "\[Rule]", "True"}]}], "]"}]}], ";", "\n", "\t",
+          "\n", "\t\t", 
+         RowBox[{"(*", 
+          RowBox[{
+          "Find", " ", "the", " ", "smallest", " ", "eigenvalues", " ", 
+           RowBox[{"(", 
+            RowBox[{
+            "corresponding", " ", "to", " ", "g", " ", "and", " ", "e", " ", 
+             "states"}], ")"}]}], "*)"}], "\n", "\t\t", 
+         RowBox[{"gIndex", "=", 
+          RowBox[{
+           RowBox[{
+            RowBox[{"Position", "[", 
+             RowBox[{"EigVals", ",", 
+              RowBox[{"Min", "[", "EigVals", "]"}]}], "]"}], "[", 
+            RowBox[{"[", "1", "]"}], "]"}], "[", 
+           RowBox[{"[", "1", "]"}], "]"}]}], ";", "\n", "\t\t", 
+         RowBox[{"eIndex", "=", 
+          RowBox[{
+           RowBox[{
+            RowBox[{"Position", "[", 
+             RowBox[{"EigVals", ",", 
+              RowBox[{"Min", "[", 
+               RowBox[{"Delete", "[", 
+                RowBox[{"EigVals", ",", "gIndex"}], "]"}], "]"}]}], "]"}], 
+            "[", 
+            RowBox[{"[", "1", "]"}], "]"}], "[", 
+           RowBox[{"[", "1", "]"}], "]"}]}], ";", "\n", "\n", "\t\t", 
+         RowBox[{"(*", 
+          RowBox[{
+          "Fill", " ", "in", " ", "the", " ", "transition", " ", "energy"}], 
+          "*)"}], "\n", "\t\t", 
+         RowBox[{
+          RowBox[{"Energyeg", "[", 
+           RowBox[{"[", 
+            RowBox[{"i", ",", "j"}], "]"}], "]"}], "=", 
+          RowBox[{
+           RowBox[{"EigVals", "[", 
+            RowBox[{"[", "eIndex", "]"}], "]"}], "-", 
+           RowBox[{"EigVals", "[", 
+            RowBox[{"[", "gIndex", "]"}], "]"}]}]}], ";"}], "\n", "\t", ",", 
+        RowBox[{"{", 
+         RowBox[{"i", ",", "1", ",", 
+          RowBox[{"Length", "[", "ngList", "]"}]}], "}"}]}], "]"}], ";"}], 
+     "\n", ",", 
+     RowBox[{"{", 
+      RowBox[{"j", ",", "1", ",", 
+       RowBox[{"Length", "[", "phiList", "]"}]}], "}"}]}], "]"}], ";"}], 
+  "\n"}], "\n", 
+ RowBox[{
+  RowBox[{"Print", "[", 
+   RowBox[{
+   "\"\<Maximal offset charge dependence of the transition energy: \>\"", ",", 
+    RowBox[{
+     RowBox[{"Max", "[", 
+      RowBox[{"Energyeg", "[", 
+       RowBox[{"[", 
+        RowBox[{";;", ",", "1"}], "]"}], "]"}], "]"}], "-", 
+     RowBox[{"Min", "[", 
+      RowBox[{"Energyeg", "[", 
+       RowBox[{"[", 
+        RowBox[{";;", ",", "1"}], "]"}], "]"}], "]"}]}]}], "]"}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{"tol", "=", 
+   SuperscriptBox["10", 
+    RowBox[{"-", "5"}]]}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{"If", "[", 
+   RowBox[{
+    RowBox[{
+     RowBox[{
+      RowBox[{"Max", "[", 
+       RowBox[{"Energyeg", "[", 
+        RowBox[{"[", 
+         RowBox[{";;", ",", "1"}], "]"}], "]"}], "]"}], "-", 
+      RowBox[{"Min", "[", 
+       RowBox[{"Energyeg", "[", 
+        RowBox[{"[", 
+         RowBox[{";;", ",", "1"}], "]"}], "]"}], "]"}]}], "<", "tol"}], ",", 
+    RowBox[{"Print", "[", "\"\<Thus, we ignore ng-dependence.\>\"", "]"}]}], 
+   "]"}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{
+  "Print", "[", "\"\<Transition energy as a function of phi:\>\"", "]"}], 
+  ";"}], "\n", 
+ RowBox[{"ListPlot", "[", 
+  RowBox[{"Table", "[", 
+   RowBox[{
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"phiList", "[", 
+       RowBox[{"[", "j", "]"}], "]"}], ",", 
+      RowBox[{"Energyeg", "[", 
+       RowBox[{"[", 
+        RowBox[{"1", ",", "j"}], "]"}], "]"}]}], "}"}], ",", 
+    RowBox[{"{", 
+     RowBox[{"j", ",", "1", ",", 
+      RowBox[{"Length", "[", "phiList", "]"}]}], "}"}]}], "]"}], 
+  "]"}]}], "Code",
+ CellChangeTimes->{
+  3.705596030657816*^9, {3.705596487000855*^9, 3.705596580002844*^9}, {
+   3.705596620124983*^9, 3.705596703076377*^9}, {3.705596761533107*^9, 
+   3.705596816186119*^9}, {3.7055974455138493`*^9, 3.7055976012421627`*^9}, {
+   3.7055976352691717`*^9, 3.705597707147835*^9}, {3.705597776296762*^9, 
+   3.7055977766078663`*^9}, {3.705597807407002*^9, 3.705597959847949*^9}, {
+   3.705598049273192*^9, 3.705598080153027*^9}, {3.70559828767463*^9, 
+   3.705598289374051*^9}, {3.7055988654846*^9, 3.7055988831076517`*^9}, {
+   3.7055989433646507`*^9, 3.7055989453635387`*^9}, {3.705598977272332*^9, 
+   3.705598977550747*^9}, {3.705599019875575*^9, 3.7055992565154*^9}, {
+   3.705599344121192*^9, 3.705599583988291*^9}, {3.705599638362173*^9, 
+   3.705599744675518*^9}, {3.7055997812848663`*^9, 3.7055998144334717`*^9}, {
+   3.705599855842554*^9, 3.7055999314126*^9}, {3.705600003585596*^9, 
+   3.705600064574068*^9}, {3.7056001152100267`*^9, 3.705600165850806*^9}, {
+   3.7056002100285*^9, 3.705600210605466*^9}, {3.7056003671146917`*^9, 
+   3.705600374722271*^9}, {3.705600410305479*^9, 3.705600456680313*^9}, {
+   3.7056005089733553`*^9, 3.7056005114054317`*^9}, {3.7056005568574038`*^9, 
+   3.705600631193101*^9}, {3.7056006628575563`*^9, 3.70560074689207*^9}, {
+   3.705600897816185*^9, 3.705601111700666*^9}, {3.705601169357115*^9, 
+   3.705601225616517*^9}, {3.705601359170615*^9, 3.705601385039407*^9}, {
+   3.705601452878684*^9, 3.7056016578064537`*^9}, {3.7056017036344967`*^9, 
+   3.705601728538179*^9}, {3.705601759105612*^9, 3.7056019161803923`*^9}, {
+   3.705602025471506*^9, 3.705602038488476*^9}, {3.7056020798488503`*^9, 
+   3.705602089078781*^9}, {3.7056024166092787`*^9, 3.7056024750969343`*^9}, {
+   3.705602511757533*^9, 3.705602590746374*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Maximal offset charge dependence of the transition energy: \
+\"\>", "\[InvisibleSpace]", "0.`"}],
+  SequenceForm[
+  "Maximal offset charge dependence of the transition energy: ", 0.],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.70560247663233*^9, 3.705602591189829*^9, {3.705764596717332*^9, 
+   3.705764614745496*^9}}],
+
+Cell[BoxData["\<\"Thus, we ignore ng-dependence.\"\>"], "Print",
+ CellChangeTimes->{
+  3.70560247663233*^9, 3.705602591189829*^9, {3.705764596717332*^9, 
+   3.7057646147469063`*^9}}],
+
+Cell[BoxData["\<\"Transition energy as a function of phi:\"\>"], "Print",
+ CellChangeTimes->{
+  3.70560247663233*^9, 3.705602591189829*^9, {3.705764596717332*^9, 
+   3.705764614748252*^9}}]
+}, Open  ]],
+
+Cell[BoxData[
+ GraphicsBox[{{}, 
+   {RGBColor[0.24720000000000014`, 0.24, 0.6], PointBox[CompressedData["
+1:eJwtzH9Q03Ucx/FtsDGcjI0AJ7Dtu4Veeck4SxFEP29hEIUIAZN+7U7zQBKM
+H+YNT2cLUAeKN5RIwYBMhBtq4EUkoJ+vjPMgC2eBx4+NgAtZwsYQcUPgiPL7
+x+uef7zuHpLPshJTGTQaDa3svwo2ypMXJO4kOIlrB2cIiN2rOh2kYJP2J8bj
+L8YJOHFB37pP60Y6B5d/LzYQcOu+2VrWxiLt+9895SwiYHyeJ+myMUmt9SBr
+aisBrzwmmeBTwumuFlOeKzmyfI2+67KI8lzImofZk1GpQspjkAPPB6aaHP6U
+Ryd3JPbUboz3ozw6Wfpgk2xzqoDyaKRBsZPTLfOFxfWKIwbeMnYd6uAsVr0G
++0vaht5ULeFzYQe2917kQfesJEJnXsBvK003tlvdIfhjbf2LyJd41eAB9uEc
+OpSTNq5S78QNYX49pu5F9Mpz4J4vh3I1ahblzeGFyoz4uj1cypvFxz1Cit45
+5EV5z/Bvq85esWzwoTw7Thca7tgL1oAzTv/0lMSG8wNzKx6eWQudfqqWJNtT
+rHMerr+02x90E5GFRNsE1mw4kujZGwB7f+J9YD39N65pjj6fIhHBW1+bha3J
+o9hYcYzrCBWDvTK5zyPShPu7BC0yHgHazbYv6kx92KjMnpFmEABVnvz8qR6c
+sC9Nm3mTAM2jCHmzuAOPjHx+IWeQANKr3/x9bC3uP7StLGt65Sc+UZRO3EB5
+rWRtvpUAe9nr0qboTmQpiwqv7yVgJDjPcbfIiLQnZU/uXl3xvx1WrrM/Rr/s
+THIpUBJQvyTvPLPHjBrn2UOeS2Jg31L4HB0eRfakP/s+5IohfFwbc50/jnSV
+zGKeVQjZgvZjf8ktKFhS8F5VeQDUxE7f9MqbRMbzHwVFuvlD/wnpWFSDDbGP
+nlOrQ9eC64C+OHzajkJY+lZn4Bq4nCsPfKx9hu5VyXKutnvD1tXDd7Kkz5H7
+VyVduyf5YKxVpbi3zyEPgbUkXuQBmYg/c0XhQE5uX4eUw6Q8J7ptjpj9IW0B
+1fzvvURO9erC0TEG5S0i0VlLeRziUN4SUke/sa09kE95y6jxx+ssg7c35Gcq
+oqpUNGh2/7SnpcwXEkKlXhlyOvhrGk3F7QIIYE0Ph/AZoLsdNzdV4QeWP9oa
+XIcZMCYLqlsXGgA/V2vzHuldQFc4H/b+d0LKcwWNb0ia6oGI8phAlqasL7wv
+pjwWCHbdY2yJISiPBelbNkXHfENQnhuknxzcMfMrQXlsGGmqnlT/Q8C/nqXc
+aA==
+     "]]}, {}},
+  AspectRatio->NCache[GoldenRatio^(-1), 0.6180339887498948],
+  Axes->True,
+  AxesLabel->{None, None},
+  AxesOrigin->{0., 1.7125586988821466`},
+  Method->{},
+  PlotRange->{{-3.141592653589793, 3.058407346410207}, {1.7125586988821466`, 
+   8.47151679184401}},
+  PlotRangeClipping->True,
+  PlotRangePadding->{{0.12400000000000001`, 0.12400000000000001`}, {
+   0.13517916185923728`, 0.13517916185923728`}}]], "Output",
+ CellChangeTimes->{
+  3.705602476921061*^9, 3.705602591286333*^9, {3.705764596858498*^9, 
+   3.705764614847835*^9}}]
+}, Open  ]],
+
+Cell["\<\
+Finally, we save the transition energies as a function of phi:\
+\>", "Text",
+ CellChangeTimes->{{3.705602101790628*^9, 3.705602134711247*^9}, {
+  3.7056023529087887`*^9, 3.705602380261396*^9}, {3.70560260783359*^9, 
+  3.705602616374452*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"SetDirectory", "[", 
+   RowBox[{"NotebookDirectory", "[", "]"}], "]"}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{"Export", "[", 
+   RowBox[{"\"\<CPBEnergyeg.dat\>\"", ",", 
+    RowBox[{"Energyeg", "[", 
+     RowBox[{"[", 
+      RowBox[{"1", ",", ";;"}], "]"}], "]"}]}], "]"}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{"Export", "[", 
+   RowBox[{"\"\<CPBphiList.dat\>\"", ",", "phiList"}], "]"}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{"Print", "[", 
+   RowBox[{
+   "\"\<The variable Energyeg[[1,;;]] was saved in the directory \>\"", ",", 
+    RowBox[{"NotebookDirectory", "[", "]"}], ",", 
+    "\"\< as CPBEnergyeg.dat\>\""}], "]"}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{"Print", "[", 
+   RowBox[{"\"\<The variable phiList was saved in the directory \>\"", ",", 
+    RowBox[{"NotebookDirectory", "[", "]"}], ",", 
+    "\"\< as CPBphiList.dat\>\""}], "]"}], ";"}]}], "Code",
+ CellChangeTimes->{{3.705602136387031*^9, 3.705602186323779*^9}, {
+   3.705602221125081*^9, 3.705602282791731*^9}, {3.705602325014991*^9, 
+   3.705602336640339*^9}, 3.705602383025354*^9, {3.705602628370955*^9, 
+   3.705602654832708*^9}, {3.705602687662517*^9, 3.705602710160192*^9}, {
+   3.705602783506833*^9, 3.70560278807349*^9}, {3.705602879524868*^9, 
+   3.705602971555181*^9}, {3.7057645170647078`*^9, 3.705764576526659*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"The variable Energyeg[[1,;;]] was saved in the directory \"\>",
+    "\[InvisibleSpace]", \
+"\<\"/Users/ffia/Documents/Aalto_Quantum_driving/Pro_Gradu_VX/numerical/\"\>",
+    "\[InvisibleSpace]", "\<\" as CPBEnergyeg.dat\"\>"}],
+  SequenceForm[
+  "The variable Energyeg[[1,;;]] was saved in the directory ", 
+   "/Users/ffia/Documents/Aalto_Quantum_driving/Pro_Gradu_VX/numerical/", 
+   " as CPBEnergyeg.dat"],
+  Editable->False]], "Print",
+ CellChangeTimes->{{3.705602945373321*^9, 3.7056029720706778`*^9}, {
+  3.7057645972866*^9, 3.7057646182644253`*^9}}],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"The variable phiList was saved in the directory \"\>", 
+   "\[InvisibleSpace]", \
+"\<\"/Users/ffia/Documents/Aalto_Quantum_driving/Pro_Gradu_VX/numerical/\"\>",
+    "\[InvisibleSpace]", "\<\" as CPBphiList.dat\"\>"}],
+  SequenceForm[
+  "The variable phiList was saved in the directory ", 
+   "/Users/ffia/Documents/Aalto_Quantum_driving/Pro_Gradu_VX/numerical/", 
+   " as CPBphiList.dat"],
+  Editable->False]], "Print",
+ CellChangeTimes->{{3.705602945373321*^9, 3.7056029720706778`*^9}, {
+  3.7057645972866*^9, 3.705764618310974*^9}}]
+}, Open  ]]
+}, Open  ]]
+},
+Evaluator->"Alternate Local Kernel",
+WindowSize->{768, 682},
+WindowMargins->{{198, Automatic}, {Automatic, 0}},
+ShowSelection->True,
+FrontEndVersion->"9.0 for Mac OS X x86 (32-bit, 64-bit Kernel) (November 20, \
+2012)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[557, 20, 202, 5, 49, "Text"],
+Cell[762, 27, 645, 15, 80, "Input"],
+Cell[1410, 44, 188, 4, 30, "Text"],
+Cell[CellGroupData[{
+Cell[1623, 52, 12238, 323, 849, "Code"],
+Cell[CellGroupData[{
+Cell[13886, 379, 378, 9, 22, "Print"],
+Cell[14267, 390, 182, 3, 22, "Print"],
+Cell[14452, 395, 189, 3, 22, "Print"]
+}, Open  ]],
+Cell[14656, 401, 1941, 38, 247, "Output"]
+}, Open  ]],
+Cell[16612, 442, 251, 5, 30, "Text"],
+Cell[CellGroupData[{
+Cell[16888, 451, 1319, 29, 114, "Code"],
+Cell[CellGroupData[{
+Cell[18232, 484, 605, 12, 38, "Print"],
+Cell[18840, 498, 583, 12, 38, "Print"]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+
+(* End of internal cache information *)
